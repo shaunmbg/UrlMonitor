@@ -1,0 +1,14 @@
+﻿AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Checks Url (primarily packtpub) and sends an email
+Resources:
+  UrlMonitor:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: UrlMonitor.lambda_handler
+      Runtime: python2.7
+      CodeUri: .
+      Description: Checks Url (primarily packtpub) and sends an email
+      MemorySize: 128
+      Timeout: 10
+      Role: 'arn:aws:iam::879208064009:role/service-role/UrlMonitorRole'

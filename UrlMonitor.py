@@ -1,5 +1,3 @@
-# use serverless on lambda architecture?
-
 # -*- coding: utf-8 -*-
 from bs4 import BeautifulSoup
 import smtplib
@@ -56,14 +54,16 @@ def send_email(subject, message):
   smtpserver.quit()
   return'Email sent!'
 
-page = request.urlopen(Url)
-soup = BeautifulSoup(page, 'lxml')
-book_title = soup.find('div', class_='dotd-title').h2.text.encode('utf-8')
-#direct_link = soup.findAll('div', class_={'float-left','free-ebook'})[-1].form.attrs['action'] #CAPTCHA prevents this being useful
-description = [x for x in soup.find('div', class_ = {'dotd-main-book-summary'}).children][-4].get_text().strip().encode('utf-8')
+def lambda_handler(event,context):
+  page = request.urlopen(Url)
+  soup = BeautifulSoup(page, 'html.parser')
+  book_title = soup.find('div', class_='dotd-title').h2.text.encode('utf-8')
+  #direct_link = soup.findAll('div', class_={'float-left','free-ebook'})  [-1].form.attrs['action'] #CAPTCHA prevents this being useful
+  description = [x for x in soup.find('div', class_ = {'dotd-main-book-summary'}).children][-4].get_text().strip().encode('utf-8')
+  book_title = re.sub(r'[\n\t]','', book_title)
+  Message = '{}\n\n{}\n\n\nVisit Page: {}\n\n\n'.format(book_title,description, Url)
 
-book_title = re.sub(r'[\n\t]','', book_title)
-Message = '{}\n\n{}\n\n\nVisit Page: {}\n\n\n'.format(book_title,description, Url)
-Subject += book_title
+  global Subject #needed to use global variable rather than a local version which generates an error
+  Subject += book_title
 
-send_email(Subject, Message)
+  send_email(Subject, Message)
